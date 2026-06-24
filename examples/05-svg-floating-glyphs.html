@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>chromostereopsis · SVG floating glyphs</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #0000FF; overflow: hidden; }
+  svg { display: block; width: 100vw; height: 100vh; }
+  #hint { position: fixed; bottom: 8px; left: 8px; color: #ffd;
+          font: 12px monospace; opacity: 0.7; pointer-events: none; }
+</style>
+</head>
+<body>
+<!-- Pure red glyphs scattered on a pure blue ground. The glyphs feel
+     like they hover in front of the plane. Generated as SVG so they
+     stay crisp at any size. Glyphs gently bob via SMIL animation. -->
+<svg id="stage" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>
+<div id="hint">SVG floating glyphs · red sigils hover off the blue plane</div>
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+const stage = document.getElementById('stage');
+const RED = '#FF0000';
+
+// A small alphabet of abstract sigil paths (drawn in a 0..1 box).
+const sigils = [
+  'M0,0 L1,0 L0.5,1 Z',
+  'M0.5,0 L0.5,1 M0,0.5 L1,0.5',
+  'M0,0 L1,1 M1,0 L0,1',
+  'M0.5,0 A0.5,0.5 0 1,1 0.49,0',
+  'M0,1 L0.5,0 L1,1 M0.25,0.5 L0.75,0.5',
+  'M0,0 L0,1 L1,1',
+];
+
+const rng = (a, b) => a + Math.random() * (b - a);
+
+for (let i = 0; i < 40; i++) {
+  const g = document.createElementNS(NS, 'g');
+  const x = rng(2, 92);
+  const y = rng(2, 92);
+  const s = rng(3, 8);                // glyph size in viewBox units
+  g.setAttribute('transform', `translate(${x},${y}) scale(${s})`);
+
+  const p = document.createElementNS(NS, 'path');
+  p.setAttribute('d', sigils[Math.floor(Math.random() * sigils.length)]);
+  p.setAttribute('stroke', RED);
+  p.setAttribute('stroke-width', rng(0.06, 0.14));
+  p.setAttribute('fill', 'none');
+  p.setAttribute('stroke-linecap', 'round');
+  g.appendChild(p);
+
+  // slow vertical bob so the layer "breathes" without heavy motion
+  const anim = document.createElementNS(NS, 'animateTransform');
+  anim.setAttribute('attributeName', 'transform');
+  anim.setAttribute('type', 'translate');
+  anim.setAttribute('additive', 'sum');
+  const amp = rng(0.3, 1.0);
+  anim.setAttribute('values', `0 0; 0 ${-amp}; 0 0`);
+  anim.setAttribute('dur', `${rng(4, 9).toFixed(1)}s`);
+  anim.setAttribute('repeatCount', 'indefinite');
+  g.appendChild(anim);
+
+  stage.appendChild(g);
+}
+</script>
+</body>
+</html>

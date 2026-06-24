@@ -1,0 +1,27 @@
+{
+  "name": "chromostereopsis",
+  "version": "0.1.0",
+  "description": "Naked-eye 3D from pure red/blue via chromatic aberration. No glasses. Sibling of chromadepth.",
+  "type": "module",
+  "scripts": {
+    "start": "python3 -m http.server 8080",
+    "dev": "python3 -m http.server 8080",
+    "test": "node --test"
+  },
+  "keywords": [
+    "chromostereopsis",
+    "depth",
+    "perceptual",
+    "red-blue",
+    "no-glasses",
+    "webgl2",
+    "glsl",
+    "chromadepth"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/merrypranxter/chromostereopsis"
+  },
+  "homepage": "https://github.com/merrypranxter/chromostereopsis#readme"
+}

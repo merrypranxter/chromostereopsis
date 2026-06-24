@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>chromostereopsis · CSS-only type pops</title>
+<style>
+  /* "Type pops": pure red text on a pure blue field. No shadow, no
+     bevel, no JS — the embossed/floating feel is entirely your eye's
+     chromatic aberration. Click the page to toggle the polarity by
+     swapping which color is the ground. */
+  :root { --ground: #0000FF; --ink: #FF0000; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    display: grid;
+    place-items: center;
+    height: 100vh;
+    font-family: Helvetica, Arial, sans-serif;
+    font-weight: 800;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+  }
+  /* swap on click via :target-less trick: toggle a class on <html> */
+  .flip { --ground: #FF0000; --ink: #0000FF; }
+  h1 { font-size: clamp(2rem, 12vw, 9rem); margin: 0; letter-spacing: -0.03em; }
+  p  { font-size: clamp(0.9rem, 3vw, 1.4rem); margin: 0.5rem 0 0; opacity: 0.9; }
+  small { display:block; margin-top: 2rem; font-weight: 400; font-size: 0.8rem; opacity: 0.7; }
+</style>
+</head>
+<body onclick="document.documentElement.classList.toggle('flip')">
+  <div>
+    <h1>RED FLOATS</h1>
+    <p>blue sinks · your eye does the 3D</p>
+    <small>click to flip the colors · no glasses, no shadows, pure color</small>
+  </div>
+</body>
+</html>
