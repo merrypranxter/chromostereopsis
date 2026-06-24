@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>chromostereopsis · polarity split</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #444; overflow: hidden; }
+  canvas { display: block; }
+  #hint { position: fixed; top: 8px; left: 50%; transform: translateX(-50%);
+          color: #ccc; font: 12px monospace; pointer-events: none; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hint">left: black ground · right: white ground · watch the depth flip across the seam</div>
+<script>
+// The educational killer feature, in plain Canvas 2D. The SAME red/blue
+// concentric-ring target is drawn twice — on black (left) and white
+// (right). Many viewers see the depth direction invert between the two
+// halves. The pixels are identical primaries; the difference is your
+// eye adapting to the background. It genuinely varies per person.
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+function drawHalf(x0, w, h, bg, t) {
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(x0, 0, w, h);
+  ctx.clip();
+
+  ctx.fillStyle = bg;
+  ctx.fillRect(x0, 0, w, h);
+
+  const cx = x0 + w / 2;
+  const cy = h / 2;
+  const maxR = Math.hypot(w, h);
+  const ringStep = 28;
+  const phase = (t * 0.02) % ringStep;
+
+  // Draw rings outside-in, alternating pure red / pure blue.
+  for (let r = maxR; r > 0; r -= ringStep) {
+    const rr = r + phase;
+    const idx = Math.floor(rr / ringStep);
+    ctx.beginPath();
+    ctx.arc(cx, cy, rr, 0, Math.PI * 2);
+    ctx.lineWidth = ringStep * 0.55;
+    ctx.strokeStyle = idx % 2 === 0 ? '#FF0000' : '#0000FF';
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function frame(t) {
+  const w = canvas.width, h = canvas.height;
+  drawHalf(0, w / 2, h, '#000', t);
+  drawHalf(w / 2, w / 2, h, '#fff', t);
+
+  // hairline seam
+  ctx.fillStyle = '#888';
+  ctx.fillRect(w / 2 - 1, 0, 2, h);
+
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

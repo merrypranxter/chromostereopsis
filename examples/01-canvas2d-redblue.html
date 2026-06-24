@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>chromostereopsis · Canvas 2D red/blue field</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+  canvas { display: block; }
+  #hint { position: fixed; top: 8px; left: 8px; color: #888;
+          font: 12px monospace; pointer-events: none; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hint">canvas2d red/blue field · click: swap background · no WebGL</div>
+<script>
+// The simplest possible chromostereopsis demo: pure red "near" stars and
+// pure blue "far" stars on a flat field, drawn with the 2D context.
+// No shaders, no build step. Your eye supplies the depth.
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let bgWhite = false;
+
+// depth 0 -> red (near), 1 -> blue (far). Always pure primaries.
+const NEAR = '#FF0000';
+const FAR = '#0000FF';
+
+let stars = [];
+function seed() {
+  stars = [];
+  const n = Math.floor((canvas.width * canvas.height) / 6000);
+  for (let i = 0; i < n; i++) {
+    const depth = Math.random();           // 0..1
+    stars.push({
+      x: Math.random(),
+      y: Math.random(),
+      depth,
+      // near stars a touch bigger, reinforcing the layering
+      r: (1 - depth) * 2.5 + 0.8,
+      color: depth < 0.5 ? NEAR : FAR,
+    });
+  }
+}
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  seed();
+}
+window.addEventListener('resize', resize);
+resize();
+
+function frame(t) {
+  ctx.fillStyle = bgWhite ? '#fff' : '#000';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  for (const s of stars) {
+    const tw = 0.6 + 0.4 * Math.sin(t * 0.002 + s.x * 50);
+    ctx.globalAlpha = tw;
+    ctx.fillStyle = s.color;
+    ctx.beginPath();
+    ctx.arc(s.x * canvas.width, s.y * canvas.height, s.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+canvas.addEventListener('click', () => { bgWhite = !bgWhite; });
+</script>
+</body>
+</html>

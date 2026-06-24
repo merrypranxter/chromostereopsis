@@ -1,0 +1,126 @@
+# chromostereopsis — REPO SEED
+
+## The Goldmine
+
+Red floats. Blue sinks. Your own eyeball does the 3D. No glasses. This is not anaglyph — there are no colored glasses, no shutter sync, no VR headset. Just pure saturated red and pure saturated blue, painted flat, and your own eye's chromatic aberration splits them into depth. Some people see red forward, some see blue forward. The effect is subtle, uncanny, and completely real. It's also the glasses-free cousin of `chromadepth` — cross-link them hard.
+
+## The Math
+
+### Longitudinal Chromatic Aberration
+The human eye refracts different wavelengths by different amounts:
+- Red (700nm) → focused *behind* the retina → appears to advance.
+- Blue (400nm) → focused *in front* of the retina → appears to recede.
+- The brain interprets this focal mismatch as depth.
+
+### Pupil Decentration
+The effect is stronger when the pupil is not perfectly centered over the optical axis — which is true for most people. The combination of chromatic aberration + pupil decentration creates the depth illusion.
+
+### Polarity Flip
+On a **white** background, the effect can **invert** (blue advances, red recedes). This is because the eye adapts differently to bright vs dark fields.
+
+## The GLSL / JS Pipeline
+
+### Pass Order
+1. **Scene** → assign depth/layer to each element.
+2. **Map** depth → red↔blue axis: near = pure `#FF0000`, far = pure `#0000FF`.
+3. **Render** max-saturation pure-channel colors on controlled background.
+4. **Optional** CA enhancement pass (`chromatic_aberration` repo).
+5. **Minimal post** — the effect lives in the eye. Heavy finishers kill it.
+
+### Red-Blue Field Generator
+```glsl
+uniform float u_depth; // 0.0 = near (red), 1.0 = far (blue)
+uniform vec3 u_bg;     // background color
+
+in vec2 v_uv;
+out vec4 fragColor;
+
+void main() {
+  // Pure red near, pure blue far
+  vec3 color = mix(vec3(1.0,0.0,0.0), vec3(0.0,0.0,1.0), u_depth);
+  // Ensure max saturation
+  float maxC = max(color.r, max(color.g, color.b));
+  if (maxC > 0.0) color /= maxC;
+  fragColor = vec4(color, 1.0);
+}
+```
+
+### Depth-from-Hue Mapper
+```glsl
+// Map scene depth to red-blue axis
+vec3 depthToChromostereopsis(float depth) {
+  // depth: 0.0 = closest, 1.0 = farthest
+  return mix(vec3(1.0,0.0,0.0), vec3(0.0,0.0,1.0), depth);
+}
+```
+
+## Aesthetic Post + Tonal Guide
+
+### Deep Field
+Starfield. Red stars in foreground, blue stars in background, black ground. The depth pops without any stereo trick.
+
+### Floating Glyphs
+Red sigils (runes, symbols) hovering off a blue plane. The glyphs feel like they're floating in front of the screen.
+
+### Polarity Demo
+Same art rendered on black vs white backgrounds, side by side. Watch the depth invert. Educational and eerie.
+
+### Breathing Layers
+Slow red↔blue cycle. The layers pulse in depth, breathing. Hypnotic, subtle.
+
+### Type Pops
+Red text floating off a blue background. The text feels embossed, 3D, without any shadow or bevel.
+
+## Repo Architecture
+
+```
+chromostereopsis/
+├── README.md
+├── repo_seed.txt
+├── context.manifest.json
+├── index.html
+├── .gitignore
+├── src/
+│   ├── js/
+│   │   ├── main.js
+│   │   └── depth-mapper.js
+│   ├── shaders/
+│   │   ├── redblue-field.frag
+│   │   ├── depth-from-hue.frag
+│   │   ├── polarity-flip.frag
+│   │   ├── edge-tuning.frag
+│   │   ├── breathing.frag
+│   │   └── ca-enhance.frag
+│   └── data/
+│       └── presets.json
+└── docs/
+    ├── visual-targets.md
+    └── perceptual-math.md
+```
+
+## Code Snippets to Seed Copilot
+
+### Max-Saturation Enforcer
+```glsl
+vec3 enforceMaxSaturation(vec3 rgb) {
+  float maxC = max(rgb.r, max(rgb.g, rgb.b));
+  if (maxC > 0.0) rgb /= maxC;
+  return rgb;
+}
+```
+
+### Polarity Flip Demo
+```js
+function renderPolarityDemo(scene, canvas) {
+  // Left half: black background
+  // Right half: white background
+  // Same red-blue pattern on both
+  // User sees depth invert between halves
+}
+```
+
+## Closing Directive
+
+Build the red-blue field generator first. Then the depth mapper. Then the polarity demo (the educational killer feature). Keep the post minimal — the effect lives in the eye, not the shader. The win condition: flat art that pops into depth layers with zero glasses. Red floats. Blue sinks. Color is math with wavelengths.
+
+**BEFORE WRITING CODE, read `repo_seed.txt` and `context.manifest.json`.** Reuse `chromatic_aberration` for CA enhancement and `color_systems` for max-saturation enforcement. Cross-link `chromadepth` hard.

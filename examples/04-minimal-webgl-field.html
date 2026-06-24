@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>chromostereopsis · minimal WebGL2 field</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; }
+  #hint { position: fixed; top: 8px; left: 8px; color: #888;
+          font: 12px monospace; pointer-events: none; }
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div id="hint">minimal WebGL2 field · move mouse: tilt depth band · runs from file://</div>
+<script type="module">
+// The smallest complete WebGL2 chromostereopsis demo: a fullscreen
+// fragment shader that draws pure red↔blue bands. Shaders are inline so
+// this runs from file:// with no server. The real app keeps shaders in
+// separate .frag files (see /src/shaders) and loads them over fetch.
+
+const canvas = document.getElementById('gl');
+const gl = canvas.getContext('webgl2');
+
+const VERT = `#version 300 es
+out vec2 v_uv;
+void main() {
+  vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2));
+  v_uv = p;
+  gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);
+}`;
+
+const FRAG = `#version 300 es
+precision highp float;
+in vec2 v_uv;
+out vec4 fragColor;
+uniform float u_time;
+uniform vec2 u_mouse;
+
+vec3 enforceMaxSaturation(vec3 c) {
+  float m = max(c.r, max(c.g, c.b));
+  return m > 0.0 ? c / m : c;
+}
+vec3 depthToChromostereopsis(float d) {
+  return mix(vec3(1.,0.,0.), vec3(0.,0.,1.), clamp(d, 0.0, 1.0));
+}
+
+void main() {
+  // diagonal bands; mouse.y tilts which way the depth ramp runs.
+  float ramp = mix(v_uv.x, v_uv.y, u_mouse.y);
+  float band = step(0.5, fract(ramp * 8.0 + u_time * 0.1));
+  vec3 col = enforceMaxSaturation(depthToChromostereopsis(band));
+  fragColor = vec4(col, 1.0);
+}`;
+
+function sh(type, src) {
+  const s = gl.createShader(type);
+  gl.shaderSource(s, src); gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS))
+    throw new Error(gl.getShaderInfoLog(s));
+  return s;
+}
+const prog = gl.createProgram();
+gl.attachShader(prog, sh(gl.VERTEX_SHADER, VERT));
+gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FRAG));
+gl.linkProgram(prog);
+gl.useProgram(prog);
+
+const uTime = gl.getUniformLocation(prog, 'u_time');
+const uMouse = gl.getUniformLocation(prog, 'u_mouse');
+const vao = gl.createVertexArray();
+const mouse = [0.5, 0.5];
+
+function resize() {
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  canvas.width = innerWidth * dpr;
+  canvas.height = innerHeight * dpr;
+  gl.viewport(0, 0, canvas.width, canvas.height);
+}
+addEventListener('resize', resize); resize();
+addEventListener('mousemove', (e) => {
+  mouse[0] = e.clientX / innerWidth;
+  mouse[1] = e.clientY / innerHeight;
+});
+
+const t0 = performance.now();
+function frame(t) {
+  gl.useProgram(prog);
+  gl.bindVertexArray(vao);
+  gl.uniform1f(uTime, (t - t0) / 1000);
+  gl.uniform2f(uMouse, mouse[0], mouse[1]);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

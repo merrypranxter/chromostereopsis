@@ -1,0 +1,34 @@
+{
+  "repo": "chromostereopsis",
+  "type": "color_generator",
+  "domain": "perceptual_depth",
+  "description": "Naked-eye 3D from pure red/blue via chromatic aberration. No glasses. Sibling of chromadepth.",
+  "batch": "color_lab_batch2",
+  "consumes": [
+    "chromatic_aberration",
+    "color_systems"
+  ],
+  "consumed_by": [],
+  "archetype": "PERCEPTUAL_DEPTH",
+  "tech_stack": [
+    "webgl2",
+    "glsl",
+    "vanilla_js"
+  ],
+  "keywords": [
+    "chromostereopsis",
+    "depth",
+    "perceptual",
+    "red_blue",
+    "no_glasses"
+  ],
+  "canon": {
+    "fbo_ping_pong": true,
+    "additive_blend": true,
+    "1d_ramp": "color_systems.js",
+    "post_finisher": true
+  },
+  "priority": 5,
+  "difficulty": "easy",
+  "status": "briefed"
+}

@@ -1,0 +1,51 @@
+{
+  "$schema": "presets for chromostereopsis modes; consumed by src/js/main.js",
+  "notes": "depth 0 = near (pure red), 1 = far (pure blue). Keep saturation maximal and CA small — heavy post kills the effect.",
+  "modes": [
+    {
+      "id": "deep_field",
+      "label": "Deep Field",
+      "background": "black",
+      "density": 1.0,
+      "ca_enhance": 0.003,
+      "rate": 0.1,
+      "edge": 0.08
+    },
+    {
+      "id": "floating_glyphs",
+      "label": "Floating Glyphs",
+      "background": "black",
+      "density": 1.0,
+      "ca_enhance": 0.004,
+      "rate": 0.1,
+      "edge": 0.08
+    },
+    {
+      "id": "polarity_demo",
+      "label": "Polarity Demo",
+      "background": "black",
+      "density": 1.0,
+      "ca_enhance": 0.0,
+      "rate": 0.1,
+      "edge": 0.08
+    },
+    {
+      "id": "breathing_layers",
+      "label": "Breathing Layers",
+      "background": "black",
+      "density": 1.0,
+      "ca_enhance": 0.0,
+      "rate": 0.08,
+      "edge": 0.08
+    },
+    {
+      "id": "type_pops",
+      "label": "Type Pops",
+      "background": "black",
+      "density": 1.0,
+      "ca_enhance": 0.004,
+      "rate": 0.1,
+      "edge": 0.05
+    }
+  ]
+}
