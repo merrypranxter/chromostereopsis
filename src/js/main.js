@@ -137,8 +137,11 @@ async function main() {
   let sceneFBO = null;
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const w = Math.floor(window.innerWidth * dpr);
-    const h = Math.floor(window.innerHeight * dpr);
+    // Clamp to >= 1 so a collapsed container (0 width/height) can't make
+    // the canvas zero-sized — that would feed 0 into shader aspect-ratio
+    // math and produce NaN/Infinity.
+    const w = Math.max(1, Math.floor(window.innerWidth * dpr));
+    const h = Math.max(1, Math.floor(window.innerHeight * dpr));
     if (canvas.width === w && canvas.height === h) return;
     canvas.width = w;
     canvas.height = h;
@@ -155,12 +158,16 @@ async function main() {
     return state.bgWhite ? [1, 1, 1] : [0, 0, 0];
   }
 
-  const start = performance.now();
-  let lastTime = 0;
+  // Accumulate elapsed time only while running, so pausing and resuming
+  // continues smoothly instead of jumping forward by the paused duration.
+  let lastFrameTime = null;
+  let elapsed = 0;
 
   function render(now) {
-    if (!state.paused) lastTime = (now - start) / 1000;
-    const t = lastTime;
+    if (lastFrameTime === null) lastFrameTime = now;
+    if (!state.paused) elapsed += (now - lastFrameTime) / 1000;
+    lastFrameTime = now;
+    const t = elapsed;
     const w = canvas.width;
     const h = canvas.height;
 
@@ -238,8 +245,10 @@ function applyPreset(presets, mode) {
 
 main().catch((err) => {
   console.error(err);
-  document.body.insertAdjacentHTML(
-    'beforeend',
-    `<pre style="color:#f44;font-family:monospace;padding:1rem;white-space:pre-wrap">${err.message}</pre>`,
-  );
+  // Build the node programmatically and use textContent so shader logs
+  // (or any error text) can never be interpreted as HTML.
+  const pre = document.createElement('pre');
+  pre.style.cssText = 'color:#f44;font-family:monospace;padding:1rem;white-space:pre-wrap';
+  pre.textContent = err.message;
+  document.body.appendChild(pre);
 });

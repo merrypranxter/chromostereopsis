@@ -31,7 +31,7 @@ vec3 depthToChromostereopsis(float depth) {
 }
 
 void main() {
-  vec2 aspect = vec2(u_resolution.x / u_resolution.y, 1.0);
+  vec2 aspect = vec2(u_resolution.x / max(u_resolution.y, 1.0), 1.0);
   vec2 c = (v_uv - 0.5) * aspect;
   float r = length(c);
 

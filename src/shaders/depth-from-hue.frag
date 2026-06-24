@@ -45,7 +45,10 @@ float glyph(vec2 f, float seed) {
     vec2 a = vec2(hash21(vec2(s, 1.0)), hash21(vec2(s, 2.0)));
     vec2 b = vec2(hash21(vec2(s, 3.0)), hash21(vec2(s, 4.0)));
     vec2 pa = f - a, ba = b - a;
-    float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+    // Guard against a degenerate segment (a == b) which would make
+    // dot(ba, ba) zero and produce NaN that propagates to the output.
+    float lenSq = dot(ba, ba);
+    float h = lenSq > 1e-4 ? clamp(dot(pa, ba) / lenSq, 0.0, 1.0) : 0.0;
     float d = length(pa - ba * h);
     g = max(g, smoothstep(0.06, 0.03, d));
   }
