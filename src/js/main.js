@@ -130,6 +130,9 @@ async function main() {
   try {
     presets = await (await fetch(new URL('presets.json', DATA_BASE))).json();
   } catch { /* presets are optional */ }
+  // Apply the starting mode's preset up front so mode 1 reflects
+  // presets.json rather than the hard-coded defaults until first switch.
+  applyPreset(presets, state.mode);
 
   // Empty VAO — the fullscreen triangle is generated from gl_VertexID.
   const vao = gl.createVertexArray();

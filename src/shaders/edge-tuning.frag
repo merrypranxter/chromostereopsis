@@ -45,8 +45,10 @@ void main() {
   float thick = clamp(u_edge, 0.01, 0.45);
   float freq = 9.0;
   vec2 g = fract(p * freq + vec2(u_time * 0.05, 0.0));
-  float v = smoothstep(thick, thick * 0.5, abs(g.x - 0.5));
-  float h = smoothstep(thick, thick * 0.5, abs(g.y - 0.5));
+  // Inverted smoothstep written portably (GLSL ES is undefined for
+  // edge0 >= edge1): full stroke at the cell center, fading by `thick`.
+  float v = 1.0 - smoothstep(thick * 0.5, thick, abs(g.x - 0.5));
+  float h = 1.0 - smoothstep(thick * 0.5, thick, abs(g.y - 0.5));
   float lattice = max(v, h);
 
   // Strokes ride the near (red) end of the axis; scroll nudges it.

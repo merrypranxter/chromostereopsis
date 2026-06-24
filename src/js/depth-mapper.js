@@ -33,11 +33,16 @@ export function depthToChromostereopsis(depth) {
 }
 
 /**
- * Enforce maximum saturation by normalising to the brightest channel.
- * Pure primaries are required for the effect — orange/cyan are too weak.
- * Mirrors `enforceMaxSaturation` in the shaders / `color_systems`.
+ * Push an RGB triple to maximum brightness by normalising to its
+ * brightest channel (the brightest channel becomes 1.0). This maximises
+ * saturation for hues that already lie on the red↔blue axis; it does NOT
+ * quantize to pure red/blue, so a mid-depth mix like [0.5,0,0.5] becomes
+ * full magenta [1,0,1] rather than snapping to a primary. The effect is
+ * strongest at the pure-primary extremes; intermediate depths read as
+ * saturated purples. Mirrors `enforceMaxSaturation` in the shaders /
+ * `color_systems`.
  * @param {[number, number, number]} rgb components in 0..1.
- * @returns {[number, number, number]} max-saturated copy.
+ * @returns {[number, number, number]} max-brightness copy.
  */
 export function enforceMaxSaturation([r, g, b]) {
   const maxC = Math.max(r, g, b);

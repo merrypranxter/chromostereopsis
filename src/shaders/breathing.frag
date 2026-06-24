@@ -47,8 +47,10 @@ void main() {
   float depth = clamp(mix(breath, band, 0.5) + (u_depth - 0.5) * 0.4, 0.0, 1.0);
 
   vec3 color = enforceMaxSaturation(depthToChromostereopsis(depth));
-  // Gentle vignette toward background so edges don't harden.
-  float vig = smoothstep(1.2, 0.2, r);
+  // Gentle vignette toward background so edges don't harden. Inverted
+  // smoothstep written portably (GLSL ES is undefined for edge0 >= edge1):
+  // 1 at center, fading to 0 by r = 1.2.
+  float vig = 1.0 - smoothstep(0.2, 1.2, r);
   color = mix(u_bg, color, vig);
 
   fragColor = vec4(color, 1.0);

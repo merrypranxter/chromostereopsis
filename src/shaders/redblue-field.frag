@@ -23,10 +23,11 @@ uniform float u_depth;   // 0.0 = near (red), 1.0 = far (blue) — global push
 uniform vec3  u_bg;      // background color (black or white)
 uniform float u_density; // star density, ~stars per cell
 
-// Reused from `color_systems`: clamp an RGB triple to maximum saturation
-// by normalising to its brightest channel. Orange/cyan are perceptually
-// weak for chromostereopsis — only pure #FF0000 / #0000FF carry the
-// effect, so every color path funnels through this.
+// Reused from `color_systems`: push an RGB triple to maximum brightness
+// by normalising to its brightest channel. This keeps colors on the
+// red↔blue axis maximally saturated; it does NOT snap to pure primaries,
+// so intermediate layer depths read as saturated purples. The pop is
+// strongest at the pure #FF0000 / #0000FF extremes.
 vec3 enforceMaxSaturation(vec3 rgb) {
   float maxC = max(rgb.r, max(rgb.g, rgb.b));
   if (maxC > 0.0) rgb /= maxC;
@@ -74,7 +75,9 @@ void main() {
       vec2 starPos = vec2(hash21(cell + 3.0), hash21(cell + 7.0));
       float d = length(f - starPos);
       float twinkle = 0.6 + 0.4 * sin(u_time * 2.0 + rnd * 6.28);
-      float star = smoothstep(0.06, 0.0, d) * twinkle;
+      // Inverted smoothstep written portably (GLSL ES is undefined for
+      // edge0 >= edge1): 1 at the star center, 0 at radius 0.06.
+      float star = (1.0 - smoothstep(0.0, 0.06, d)) * twinkle;
       vec3 starCol = depthToChromostereopsis(layerDepth);
       color = mix(color, enforceMaxSaturation(starCol), star);
     }

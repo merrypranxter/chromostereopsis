@@ -12,12 +12,12 @@ Pure saturated red and pure blue at the same depth appear at **different** depth
 
 ## engines
 
-- `redblue_field.glsl` — max-separation pure-primary field.
-- `depth_from_hue.glsl` — map scene depth → red↔blue axis.
-- `polarity_flip.glsl` — black vs white background (effect inverts).
-- `edge_tuning.glsl` — thin red figures on blue ground.
-- `breathing.glsl` — animate red→blue so layers pulse.
-- `ca_enhance.glsl` — subtle chromatic aberration boost (`chromatic_aberration`).
+- `src/shaders/redblue-field.frag` — max-separation pure-primary field.
+- `src/shaders/depth-from-hue.frag` — map scene depth → red↔blue axis.
+- `src/shaders/polarity-flip.frag` — black vs white background (effect inverts).
+- `src/shaders/edge-tuning.frag` — thin red figures on blue ground.
+- `src/shaders/breathing.frag` — animate red→blue so layers pulse.
+- `src/shaders/ca-enhance.frag` — subtle chromatic aberration boost (`chromatic_aberration`).
 
 ## pipeline
 
@@ -38,9 +38,10 @@ Pure saturated red and pure blue at the same depth appear at **different** depth
 
 ```
 mode: deep_field | floating_glyphs | polarity_demo | breathing | type_pops
-background: black | white
+background: black | white   (ignored by polarity_demo, which is a fixed split)
 saturation: 1.0 (must be max)
-ca_enhance: 0.0–1.0
+ca_enhance: 0.0–0.01  (keep it tiny; ~0.004 typical — larger reads as an
+                       RGB-split glitch and destroys the effect)
 ```
 
 ## gotchas
@@ -62,7 +63,8 @@ npm start          # python3 -m http.server 8080
 ```
 
 Controls: `1`–`5` switch modes · scroll pushes depth · click swaps the
-background · `c` toggles the CA pass · space pauses.
+background · `c` toggles the CA pass · space pauses. (Click-to-swap has no
+effect in `polarity_demo`, which is a fixed black/white split by design.)
 
 No-server demos live in [`examples/`](./examples/) — those run straight
 from `file://`. Start with `examples/01-canvas2d-redblue.html`.

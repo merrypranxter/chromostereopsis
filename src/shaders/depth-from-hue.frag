@@ -50,7 +50,9 @@ float glyph(vec2 f, float seed) {
     float lenSq = dot(ba, ba);
     float h = lenSq > 1e-4 ? clamp(dot(pa, ba) / lenSq, 0.0, 1.0) : 0.0;
     float d = length(pa - ba * h);
-    g = max(g, smoothstep(0.06, 0.03, d));
+    // Inverted smoothstep written portably (GLSL ES is undefined for
+    // edge0 >= edge1).
+    g = max(g, 1.0 - smoothstep(0.03, 0.06, d));
   }
   return g;
 }

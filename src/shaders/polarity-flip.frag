@@ -59,8 +59,9 @@ void main() {
 
   vec3 color = pattern(uv, bg);
 
-  // Hairline divider down the seam.
-  float seam = smoothstep(0.002, 0.0, abs(v_uv.x - 0.5));
+  // Hairline divider down the seam. Inverted smoothstep written
+  // portably (GLSL ES is undefined for edge0 >= edge1).
+  float seam = 1.0 - smoothstep(0.0, 0.002, abs(v_uv.x - 0.5));
   color = mix(color, vec3(0.5), seam);
 
   fragColor = vec4(color, 1.0);
